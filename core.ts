@@ -8,7 +8,6 @@
 import uuid from 'uuid';
 import sqlite from 'sqlite3';
 
-
 /**
  * DB Setup
  * @param {String} dbPath

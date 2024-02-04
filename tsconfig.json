@@ -1,7 +1,0 @@
-{
-    "compilerOptions": {
-        "module": "node16",
-        "target": "es2020",
-        "baseUrl": "./"
-    }
-}
