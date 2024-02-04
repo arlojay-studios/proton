@@ -1,26 +1,22 @@
 'use strict';
 
 /**
- * Module Dependancies
+ * Module Dependencies
  * @private
  */
 
 import uuid from 'uuid';
 import sqlite from 'sqlite3';
 
-/**
- * Module Exports
- * @public
- */
-
 
 /**
  * DB Setup
  * @param {String} dbPath
- * @returns {Database}
+ * @returns {protonDB}
+ * @public
  */
 
-export class Database {
+export class protonDB {
     private db: sqlite.Database;
 
     constructor(dbPath: string) {
@@ -70,17 +66,17 @@ export class Database {
 /**
  * UUID Generation and DB Interface
  * @param {String} uuid
- * @param {Database} db
+ * @param {protonDB} db
  * @returns {Boolean}
  * @public
  */
 
-export class uuidChecker {
+export class protonUUID {
     generateClientId(): string {
         return uuid.v4();
     }
 
-    isClientInDatabase(db: Database, clientId: string, ): Promise<boolean> {
+    isClientInProtonDB(db: protonDB, clientId: string, ): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
             await db.open();
             const user = await db.get('SELECT * FROM users WHERE uuid = ?', [clientId])
@@ -89,11 +85,11 @@ export class uuidChecker {
         })
     }
 
-    storeClientIdInDatabase(db: Database, clientId: string): Promise<void> {
+    storeClientIdInProtonDB(db: protonDB, clientId: string): Promise<void> {
         return new Promise(async (resolve, reject) => {
             await db.open();
             await db.run('INSERT INTO users (uuid) VALUES (?)', [clientId])
-            let success = await this.isClientInDatabase(db, clientId);
+            let success = await this.isClientInProtonDB(db, clientId);
             success == true ? resolve() : reject()
             await db.close();
         })
