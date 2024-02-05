@@ -22,6 +22,10 @@ export class protonDB {
         this.db = new sqlite.Database(dbPath);
     }
 
+    /**
+     * Open a database
+     */
+
     public open(): Promise<void> {
         return new Promise((resolve, reject) => {
             this.db.serialize(() => {
@@ -30,6 +34,10 @@ export class protonDB {
         })
     }
 
+    /**
+     * Close a database
+     */
+
     public close(): Promise<void> {
         return new Promise((resolve, reject) =>
             this.db.close((err) => {
@@ -37,13 +45,26 @@ export class protonDB {
             }))
     }
 
-    public run(query: string, params: any[] = []): Promise<void> {
+    /**
+     * SQLite3 Command Procesor
+     * @param {string} command 
+     * @param {any[]} params 
+     */
+
+    public run(command: string, params: any[] = []): Promise<void> {
         return new Promise((resolve, reject) => {
-            this.db.run(query, params, (err) => {
+            this.db.run(command, params, (err) => {
                 err ? reject(err) : resolve();
             })
         })
     }
+
+    /**
+     * Search a database
+     * @param {string} query What to search for
+     * @param {any[]} params 
+     * @returns {T} Matches | undefined
+     */
 
     public get<T>(query: string, params: any[] = []): Promise<T | undefined> {
         return new Promise((resolve, reject) => {
@@ -53,6 +74,13 @@ export class protonDB {
         })
     }
 
+    /**
+     * Search for all in a database
+     * @param {string} query What to search for
+     * @param {any[]} params 
+     * @returns Array of matches 
+     */
+    
     public all<T>(query: string, params: any[] = []): Promise<T[]> {
         return new Promise((resolve, reject) => {
             this.db.all(query, params, (err, rows: T[]) => {
@@ -64,9 +92,6 @@ export class protonDB {
 
 /**
  * UUID Generation and DB Interface
- * @param {String} uuid
- * @param {protonDB} db
- * @returns {Boolean}
  * @public
  */
 
@@ -75,22 +100,30 @@ export class protonUUID {
         return uuid.v4();
     }
 
+    /**
+     * Check if user is in the database -- (database must already be open and will not be closed)
+     * @param { protonDB } db - Database to search
+     * @param { string } cliendId - Client id to lookup
+     * @returns { Boolean }
+     */
     isClientInProtonDB(db: protonDB, clientId: string, ): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
-            await db.open();
             const user = await db.get('SELECT * FROM users WHERE uuid = ?', [clientId])
             user ? resolve(true) : reject()
-            await db.close();
         })
     }
 
+    /**
+     * Store new user id in the database -- (database must already be open and will not be closed)
+     * @param {protonDB} db - Database to search 
+     * @param {string} clientId - Client id to save 
+     * @returns 
+     */
     storeClientIdInProtonDB(db: protonDB, clientId: string): Promise<void> {
         return new Promise(async (resolve, reject) => {
-            await db.open();
             await db.run('INSERT INTO users (uuid) VALUES (?)', [clientId])
             let success = await this.isClientInProtonDB(db, clientId);
             success == true ? resolve() : reject()
-            await db.close();
         })
     }
 }
