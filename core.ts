@@ -10,8 +10,8 @@ import sqlite from 'sqlite3';
 
 /**
  * DB Setup
- * @param {String} dbPath
- * @returns {protonDB}
+ * @param { String } dbPath
+ * @returns { protonDB }
  * @public
  */
 
@@ -27,7 +27,7 @@ export class protonDB {
      */
 
     public open(): Promise<void> {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             this.db.serialize(() => {
                 resolve()
             })
@@ -47,8 +47,8 @@ export class protonDB {
 
     /**
      * SQLite3 Command Procesor
-     * @param {string} command 
-     * @param {any[]} params 
+     * @param { string } command 
+     * @param { any[] } params 
      */
 
     public run(command: string, params: any[] = []): Promise<void> {
@@ -61,9 +61,9 @@ export class protonDB {
 
     /**
      * Search a database
-     * @param {string} query What to search for
-     * @param {any[]} params 
-     * @returns {T} Matches | undefined
+     * @param { string } query What to search for
+     * @param { any[] } params 
+     * @returns { T } Matches | undefined
      */
 
     public get<T>(query: string, params: any[] = []): Promise<T | undefined> {
@@ -76,12 +76,12 @@ export class protonDB {
 
     /**
      * Search for all in a database
-     * @param {string} query What to search for
-     * @param {any[]} params 
-     * @returns Array of matches 
+     * @param { string } query What to search for
+     * @param { any[] } params 
+     * @returns { T[] } Matches | undefined
      */
     
-    public all<T>(query: string, params: any[] = []): Promise<T[]> {
+    public all<T>(query: string, params: any[] = []): Promise<T[] | undefined> {
         return new Promise((resolve, reject) => {
             this.db.all(query, params, (err, rows: T[]) => {
                 err ? reject(err) : resolve(rows);
@@ -103,27 +103,28 @@ export class protonUUID {
     /**
      * Check if user is in the database -- (database must already be open and will not be closed)
      * @param { protonDB } db - Database to search
-     * @param { string } cliendId - Client id to lookup
+     * @param { string } clientId - Client id to lookup
      * @returns { Boolean }
      */
+
     isClientInProtonDB(db: protonDB, clientId: string, ): Promise<boolean> {
         return new Promise(async (resolve, reject) => {
-            const user = await db.get('SELECT * FROM users WHERE uuid = ?', [clientId])
-            user ? resolve(true) : reject()
+            await db.get('SELECT * FROM users WHERE uuid = ?', [clientId]) ? resolve(true) : reject()
         })
     }
 
     /**
      * Store new user id in the database -- (database must already be open and will not be closed)
-     * @param {protonDB} db - Database to search 
-     * @param {string} clientId - Client id to save 
+     * @param { protonDB } db - Database to search 
+     * @param { string } clientId - Client id to save 
      * @returns 
      */
+
     storeClientIdInProtonDB(db: protonDB, clientId: string): Promise<void> {
         return new Promise(async (resolve, reject) => {
             await db.run('INSERT INTO users (uuid) VALUES (?)', [clientId])
-            let success = await this.isClientInProtonDB(db, clientId);
-            success == true ? resolve() : reject()
+            await this.isClientInProtonDB(db, clientId) == true ? resolve() : reject()
+            
         })
     }
 }
